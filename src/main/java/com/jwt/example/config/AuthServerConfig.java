@@ -34,6 +34,12 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 		return store;
 	}
 	
+	
+	/**
+	 * Symmetric key implementation(not recommended when 
+	 * authorization server and resource server are in different application)
+	 * 
+	 */
 //	@Bean
 //	public JwtAccessTokenConverter converter() {
 //		JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
@@ -42,10 +48,11 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 //	}
 	
 	
-	/*
+	/**
 	 * JWT Asymmetric key implementation
 	 * generate keypair command: keytool -genkeypair -alias ssia -keyalg RSA -keypass ssia123 -keystore ssia.jks -storepass ssia123
 	 * extract public key command: keytool -list -rfc --keystore ssia.jks | openssl x509 -inform pem -pubkey
+	 * IT IS NOT A GOOD PRACTICE TO STORE KEYPAIR IN HE CLASSPATH! 
 	 */
 	
 	@Bean
@@ -56,12 +63,20 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 		return converter;
 	}
 	
+	
+	/**
+	 * configure endpoint security
+	 */
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-		// TODO Auto-generated method stub
-		super.configure(security);
+		security.tokenKeyAccess("isAuthenticated()");
 	}
 
+	
+	/**
+	 * For client that configured in the database, MUST SPECIFY SCOPE, otherwise cannot be used by the application/
+	 * However, if configure it in memory, you can ignore the scope part.
+	 */
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		clients.withClientDetails(service);
